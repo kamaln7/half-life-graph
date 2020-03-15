@@ -7,7 +7,9 @@
     <div class="black-80 mb3">
       <div class="measure-narrow">
         <label for="hours" class="f6 b db mb2"
-          >Showing activity over {{ this.hours }} hours.</label
+          >Showing activity over
+          <span class="gold bg-near-black br1 ph1">{{ this.hours }}</span>
+          hours.</label
         >
         <div class="flex items-center">
           <span>1</span>

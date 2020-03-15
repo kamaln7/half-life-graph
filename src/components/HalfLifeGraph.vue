@@ -1,7 +1,14 @@
 <script>
+import Chart from "chart.js";
 import { Line, mixins } from "vue-chartjs";
 const { reactiveData } = mixins;
 import { range, sum } from "lodash";
+
+Chart.defaults.global.defaultFontColor = "#FFB700";
+Chart.defaults.global.defaultFontStyle = "bold";
+Chart.defaults.global.defaultFontFamily =
+  "-apple-system,BlinkMacSystemFont,avenir next,avenir,helvetica neue,helvetica,ubuntu,roboto,noto,segoe ui,arial,sans-serif";
+Chart.defaults.global.animation.duration = 400;
 
 export default {
   extends: Line,
@@ -13,8 +20,37 @@ export default {
       options: {
         maintainAspectRatio: false,
         responsive: true,
-        duration: 200,
-        defaultColor: "#FF41B4"
+        scales: {
+          yAxes: [
+            {
+              scaleLabel: {
+                display: true,
+                labelString: "Active (mg)"
+              }
+            }
+          ],
+          xAxes: [
+            {
+              scaleLabel: {
+                display: true,
+                labelString: "Hours"
+              }
+            }
+          ]
+        },
+        tooltips: {
+          callbacks: {
+            label: function(tooltipItem, data) {
+              var label = data.datasets[tooltipItem.datasetIndex].label || "";
+
+              if (label) {
+                label += ": ";
+              }
+              label += Math.round(tooltipItem.yLabel * 100) / 100;
+              return label + "mg";
+            }
+          }
+        }
       }
     };
   },
@@ -23,11 +59,11 @@ export default {
     makeDataset: function(dataset, i, overrides = {}) {
       return {
         label: dataset.label,
-        borderColor: "rgba(0, 231, 255, 0.9)",
-        pointBackgroundColor: "white",
-        pointBorderColor: "#ccc",
-        backgroundColor: this.gradients[1],
-        borderWidth: 1,
+        borderColor: "#FFFCEB",
+        pointBackgroundColor: "#FFFCEB",
+        pointBorderColor: "#FFFCEB",
+        backgroundColor: this.gradients.common,
+        borderWidth: 1.5,
         data: dataset.data,
         cubicInterpolationMode: "monotone",
         order: i,
@@ -35,20 +71,24 @@ export default {
       };
     },
     makeGradients: function() {
-      if (this.gradients.length) return;
+      if (this.gradients.common) return;
 
-      this.gradients = [
-        this.$refs.canvas.getContext("2d").createLinearGradient(0, 0, 0, 450),
-        this.$refs.canvas.getContext("2d").createLinearGradient(0, 0, 0, 450)
-      ];
+      this.gradients = {
+        common: this.$refs.canvas
+          .getContext("2d")
+          .createLinearGradient(0, 0, 0, 450),
+        total: this.$refs.canvas
+          .getContext("2d")
+          .createLinearGradient(0, 0, 0, 450)
+      };
 
-      this.gradients[0].addColorStop(0, "rgba(255, 0,0, 0.5)");
-      this.gradients[0].addColorStop(0.5, "rgba(255, 0, 0, 0.25)");
-      this.gradients[0].addColorStop(1, "rgba(255, 0, 0, 0)");
+      this.gradients.common.addColorStop(0, "rgba(255, 252, 235, 0.4)");
+      this.gradients.common.addColorStop(0.5, "rgba(255, 252, 235, 0.2)");
+      this.gradients.common.addColorStop(1, "rgba(255, 252, 235, 0.1)");
 
-      this.gradients[1].addColorStop(0, "rgba(0, 231, 255, 0.9)");
-      this.gradients[1].addColorStop(0.5, "rgba(0, 231, 255, 0.25)");
-      this.gradients[1].addColorStop(1, "rgba(0, 231, 255, 0)");
+      this.gradients.total.addColorStop(0, "rgba(255, 183, 0, 0.9)");
+      this.gradients.total.addColorStop(0.5, "rgba(255, 183, 0, 0.5)");
+      this.gradients.total.addColorStop(1, "rgba(255, 183, 0, 0.1)");
     },
     setChartData() {
       const data = {
@@ -68,8 +108,8 @@ export default {
         -1,
         {
           borderWidth: 2,
-          borderColor: "rgba(255, 0,0, 0.9)",
-          backgroundColor: this.gradients[0]
+          borderColor: "#FFB700",
+          backgroundColor: this.gradients.total
         }
       );
 
